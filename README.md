@@ -39,6 +39,9 @@ Hadoop 3 requires Java 8. At the time of this writing (November 2019), the docum
 
 
 ```sh
+# Update apt sources
+sudo apt update
+
 # Hadoop 3.x supports Java 8
 sudo apt-get install openjdk-8-jdk
 
