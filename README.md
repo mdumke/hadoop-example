@@ -218,7 +218,7 @@ Finally, when we run `start-dfs.sh` again, all processes start up. When the serv
 ```sh
 # create a data directory and add some content
 hdfs dfs -mkdir -p /raw/xml
-hdfs dfs -put $HADOOP_HOME/etc/hadoop/*.xml /raw/input
+hdfs dfs -put $HADOOP_HOME/etc/hadoop/*.xml /raw/xml
 
 # inspect successful ingestion
 hdfs dfs -ls -R /
@@ -313,7 +313,7 @@ This should enough to run a first job. Inside $HADOOP_HOME, we find the streamin
 
 ```sh
 # prepare the streaming job
-HADOOP_STREAMING_JAR=$(find $HADOOP_HOME -name *streaming-3.2.1.jar)"
+HADOOP_STREAMING_JAR="$(find $HADOOP_HOME -name *streaming-3.2.1.jar)"
 
 # run an example job
 yarn jar $HADOOP_STREAMING_JAR \
