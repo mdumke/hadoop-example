@@ -32,14 +32,27 @@
         name: openjdk-8-jdk
         state: present
 
-    # TODO: make idempotent
-    #- name: copy binaries
-    #  unarchive:
-    #    src: ./binaries/hadoop-3.2.1.tar.gz
-    #    dest: /usr/local
-    #
-    #- name: rename for easier access
-    #  shell: mv /usr/local/hadoop-3.2.1 /usr/local/hadoop
+    - name: Check if hadoop binaries are downloaded
+      stat:
+        path: /usr/local/hadoop-3.2.1.tar.gz
+      register: hadoop_stat
+
+    - name: Download Hadoop
+      when: hadoop_stat.stat.exists == False 
+      get_url:
+        url: http://apache.lauf-forum.at/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+        dest: /usr/local/hadoop-3.2.1.tar.gz
+
+    - name: copy binaries
+      when: hadoop_stat.stat.exists == False 
+      unarchive:
+        remote_src: yes
+        src: /usr/local/hadoop-3.2.1.tar.gz
+        dest: /usr/local
+
+    - name: rename for easier access
+      when: hadoop_stat.stat.exists == False 
+      shell: mv /usr/local/hadoop-3.2.1 /usr/local/hadoop
 
     - name: assign hadoop to hduser
       file:
