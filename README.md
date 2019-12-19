@@ -11,7 +11,7 @@ For this part, use an Ubuntu 18.04 image. Before starting the VM, make sure to u
 
 ```sh
 # use an ubuntu 18.04 image
-vagrant init ubuntu/xenial64
+vagrant init ubuntu/bionic64
 ```
 
 ```ruby
