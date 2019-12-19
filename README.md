@@ -11,7 +11,7 @@ For this part, use an Ubuntu 18.04 image. Before starting the VM, make sure to u
 
 ```sh
 # use an ubuntu 18.04 image
-vagrant init ubuntu/xenial64
+vagrant init ubuntu/bionic64
 ```
 
 ```ruby
@@ -39,6 +39,9 @@ Hadoop 3 requires Java 8. At the time of this writing (November 2019), the docum
 
 
 ```sh
+# Update apt sources
+sudo apt update
+
 # Hadoop 3.x supports Java 8
 sudo apt-get install openjdk-8-jdk
 
@@ -70,7 +73,7 @@ sudo mv hadoop-3.2.1 hadoop
 
 For more fine-grained security control, only users with access restrictions will be allowed to operate Hadoop. The first of these users will be `hduser` in the group `hadoop`, both of which need to be created (for simplicity, we use `hduser` as password as well):
 
-```
+```sh
 # inside the VM, create a hadoop group with a user
 sudo addgroup hadoop
 sudo adduser --ingroup hadoop hduser
@@ -78,10 +81,12 @@ sudo adduser --ingroup hadoop hduser
 
 Now we can make the Hadoop executables available to the hadoop group and the first user.
 
-```
+```sh
 # hand it over to the hduser and hadoop group
 sudo chown -R hduser:hadoop hadoop
 ```
+
+From now on we are continuing as the `hduser` user.
 
 ### Preparing the Environment
 
@@ -218,7 +223,7 @@ Finally, when we run `start-dfs.sh` again, all processes start up. When the serv
 ```sh
 # create a data directory and add some content
 hdfs dfs -mkdir -p /raw/xml
-hdfs dfs -put $HADOOP_HOME/etc/hadoop/*.xml /raw/input
+hdfs dfs -put $HADOOP_HOME/etc/hadoop/*.xml /raw/xml
 
 # inspect successful ingestion
 hdfs dfs -ls -R /
@@ -313,7 +318,7 @@ This should enough to run a first job. Inside $HADOOP_HOME, we find the streamin
 
 ```sh
 # prepare the streaming job
-HADOOP_STREAMING_JAR=$(find $HADOOP_HOME -name *streaming-3.2.1.jar)"
+HADOOP_STREAMING_JAR="$(find $HADOOP_HOME -name *streaming-3.2.1.jar)"
 
 # run an example job
 yarn jar $HADOOP_STREAMING_JAR \
