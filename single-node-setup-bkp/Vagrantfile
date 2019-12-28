@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = '2'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vbguest.auto_update = false
+  config.vm.box = 'geerlingguy/ubuntu1804'
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  config.vm.hostname = 'hadoop'
+  config.vm.network :private_network, ip: '192.168.60.2'
+
+  config.vm.provider 'virtualbox' do |vb|
+    vb.memory = '4096'
+  end
+end
