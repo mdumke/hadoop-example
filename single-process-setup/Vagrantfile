@@ -1,0 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = '2'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = 'generic/ubuntu1804'
+  config.vbguest.auto_update = false
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.hostname = 'hadoop'
+  config.vm.network :private_network, ip: '192.168.60.2'
+
+  config.vm.provider 'virtualbox' do |vb|
+    vb.memory = '2048'
+  end
+
+  config.vm.provision 'shell', inline: <<-SHELL
+    sudo ln -s /usr/bin/python3 /usr/bin/python
+  SHELL
+end

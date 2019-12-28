@@ -1,0 +1,58 @@
+---
+- hosts: hadoop
+  become: yes
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Update apt cache if necessary
+      apt: update_cache=yes cache_valid_time=3600
+
+  tasks:
+    - name: Install Java
+      apt: name=openjdk-8-jdk state=present
+
+    - name: Check if Hadoop already exists
+      stat:
+        path: /usr/local/hadoop/README.txt
+      register: hadoop
+
+    - name: Download Hadoop
+      when: hadoop.stat.exists == false
+      get_url:
+        url: "{{ hadoop_download_url }}"
+        dest: /tmp/hadoop-3.2.1.tar.gz
+        checksum: "{{ hadoop_checksum }}"
+
+    - name: Unpack Hadoop
+      when: hadoop.stat.exists == false
+      unarchive:
+        src: /tmp/hadoop-3.2.1.tar.gz
+        dest: /usr/local
+        remote_src: yes
+
+    - name: Rename Hadoop for easier access
+      when: hadoop.stat.exists == false
+      command: mv /usr/local/hadoop-3.2.1 /usr/local/hadoop
+
+    - name: Configure environment variables
+      lineinfile:
+        dest: "/home/{{ sudo_account }}/.profile"
+        regexp: "^export {{ item.var }}="
+        line: "export {{ item.var }}={{ item.path }}"
+        state: present
+      with_items:
+        - var: "JAVA_HOME"
+          path: "/usr/lib/jvm/java-8-openjdk-amd64"
+        - var: "HADOOP_HOME"
+          path: "{{ hadoop_home }}"
+        - var: "HADOOP_STREAMING_JAR"
+          path: "{{ hadoop_home }}/share/hadoop/tools/lib/hadoop-streaming-3.2.1.jar"
+
+    - name: Update PATH variable
+      lineinfile:
+        dest: "/home/{{ sudo_account }}/.profile"
+        regexp: "^export PATH=$PATH:"
+        line: "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin"
+        insertafter: EOF
+        state: present
