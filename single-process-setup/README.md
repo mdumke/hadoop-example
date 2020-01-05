@@ -2,9 +2,8 @@
 
 From the [official guide](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html) we learn that Hadoop can run in a single Java process. We'll recreate this simple setup to get a first impression of how Hadoop operates.
 
-## Preparing the Environment
-
-For good measure, let's start from scratch using a fresh installation of Ubuntu 18.04 inside a virtual machine. I'll use Vagrant 2.2.6 with VirtualBox 5.1.38 to create a local setup. The [Vagrantfile](./Vagrantfile) specifies an environment with 2GB of RAM, and it can be started with
+## Preparing a Virtual Machine
+For good measure, let's start from scratch using a fresh installation of Ubuntu 18.04 on a virtual machine. I'll use Vagrant 2.2.6 with VirtualBox 5.1.38 to create a local setup. The [Vagrantfile](./Vagrantfile) specifies an environment with 2GB of RAM, and it can be started with
 
 ```sh
 # start the vm
@@ -15,7 +14,6 @@ vagrant ssh
 ```
 
 ## Installing Hadoop via Ansible
-
 If you'd like to get started quickly, run the ansible playbook to provision the VM. You may need to adapt the `inventory.cfg` and the `sudo_account` and `vars.yml` if you're not using Vagrant, but this should suffice to run:
 
 ```sh
@@ -24,7 +22,6 @@ ansible-playbook playbook.yml -i inventory.cfg
 ```
 
 ## Installing Hadoop Manually
-
 In the following, I'll go over the relevant steps to download and install Hadoop manually, before capturing everything in a few Ansible tasks.
 
 First and foremost, we need Java installed. Hadoop 3 depends on Java 8 (a Java 11 version is in the making), so let's get that:
@@ -92,7 +89,6 @@ export HADOOP_STREAMING_JAR=\
 ```
 
 ## Running an Example Job
-
 Perhaps the simplest way to run a task on Hadoop is through it's streaming jar. Normally, we would have to write mappers and reducers that compile to run on the JVM (typically using Java, Scala or Kotlin). These jobs would accept input data from Hadoop and produce output data in a standardized format. With streaming, this process can be simplified: our mappers and reducers simply read from *STDIN* and write to *STDOUT*. Without going too much into the details of MapReduce at this point, let's see how this works on an example.
 
 We start with a little bit of data preparation:
