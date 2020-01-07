@@ -1,0 +1,10 @@
+---
+hadoop_version: 3.2.1
+hadoop_download_url: "http://ftp.halifax.rwth-aachen.de/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz"
+hadoop_checksum: sha512:d62709c3d7144fcaafc60e18d0fa03d7d477cc813e45526f3646030cd87dbf010aeccf3f4ce795b57b08d2884b3a55f91fe9d74ac144992d2dfe444a4bbf34ee
+
+hadoop_home: /usr/local/hadoop
+hadoop_default_replication: 2
+hadoop_namenode_path: /usr/local/hadoop/namenode
+hadoop_datanode_path: /usr/local/hadoop/datanode
+hadoop_tmp_path: /usr/local/hadoop/tmp

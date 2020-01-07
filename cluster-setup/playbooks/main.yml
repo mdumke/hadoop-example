@@ -1,0 +1,133 @@
+---
+- hosts: hadoop
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: force dns - TODO - remove when dns is back up
+      replace:
+        path: /etc/resolv.conf
+        regexp: '^nameserver 127.0.0.53'
+        replace: 'nameserver 8.8.8.8'
+
+    - name: Update cache if necessary
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400
+
+  tasks:
+    - name: Prepare /etc/hosts
+      shell: echo "127.0.0.1 localhost" > /etc/hosts
+
+    - name: Prepare /etc/hostname
+      shell: echo "{{ ansible_hostname }}" > /etc/hostname
+
+    - name: Make hosts known
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "^{{ item }} {{ hostvars[item]['ansible_facts']['hostname'] }}"
+        line: "{{ item }} {{ hostvars[item]['ansible_facts']['hostname'] }}"
+        state: present
+      with_items:
+        - "{{ groups['hadoop'] }}"
+
+    - name: Install Java
+      apt:
+        name: openjdk-8-jdk
+        state: present
+
+    - name: Create group hadoop
+      group: name=hadoop state=present
+
+    - name: Create user hdfs
+      user:
+        name: hdfs
+        group: hadoop
+        create_home: yes
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
+        shell: /bin/bash
+        state: present
+        password: $1$SomeSalt$AMNSBufwlUERGdLU31xgi0 #password: hduser
+
+    - name: Fetch hdfs user's key
+      fetch:
+        src: /home/hdfs/.ssh/id_rsa.pub
+        dest: "tmp/{{ ansible_host }}-id_rsa.pub"
+        flat: yes
+
+    - name: Distribute hdfs user's key
+      authorized_key:
+        user: hdfs
+        state: present
+        key: "{{ lookup('file', 'tmp/{{ item }}-id_rsa.pub') }}"
+      with_items:
+        - "{{ groups['hadoop'] }}"
+
+    - name: Remove local tmp directory
+      become: no
+      local_action: file path=tmp state=absent
+
+    - name: Check if Hadoop already exists
+      stat:
+        path: /usr/local/hadoop/README.txt
+      register: hadoop
+
+    - name: Download Hadoop
+      when: hadoop.stat.exists == false
+      get_url:
+        url: "{{ hadoop_download_url }}"
+        dest: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+        checksum: "{{ hadoop_checksum }}"
+
+    - name: Unpack Hadoop
+      when: hadoop.stat.exists == false
+      unarchive:
+        src: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+        dest: /usr/local
+        group: hadoop
+        owner: hdfs
+        remote_src: yes
+
+    - name: Rename Hadoop for easier access
+      when: hadoop.stat.exists == false
+      command: "mv /usr/local/hadoop-{{ hadoop_version }} /usr/local/hadoop"
+
+    - name: Let Hadoop know about Java
+      lineinfile:
+        dest: /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+        regexp: "^export JAVA_HOME"
+        line: "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
+        state: present
+
+    - name: Create /etc/profile.d/hadoop.sh
+      file:
+        path: /etc/profile.d/hadoop.sh
+        group: root
+        owner: root
+        mode: 0644
+        state: touch
+
+    - name: Set Hadoop environment variables
+      lineinfile:
+        dest: /etc/profile.d/hadoop.sh
+        regexp: "^export {{ item.variable }}"
+        line: "export {{ item.variable }}={{ item.value }}"
+        state: present
+      with_items:
+        - variable: HADOOP_HOME
+          value: /usr/local/hadoop
+
+    - name: Manipulate PATH variable
+      lineinfile:
+        dest: /etc/profile.d/hadoop.sh
+        regexp: "^export PATH=$PATH:$HADOOP_HOME/{{ item }}"
+        line: "export PATH=$PATH:$HADOOP_HOME/{{ item }}"
+        state: present
+      with_items:
+        - bin
+        - sbin
+

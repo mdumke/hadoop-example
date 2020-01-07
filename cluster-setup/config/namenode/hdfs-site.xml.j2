@@ -1,0 +1,11 @@
+<configuration>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:{{ hadoop_namenode_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ hadoop_default_replication }}</value>
+    </property>
+</configuration>

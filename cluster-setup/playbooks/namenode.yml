@@ -1,0 +1,44 @@
+---
+- hosts: masters
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Specify worker nodes
+      lineinfile:
+        dest: /usr/local/hadoop/etc/hadoop/workers
+        regexp: "{{ item }}"
+        line: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ groups['workers'] }}"
+
+    - name: Ensure localhost is not a worker
+      lineinfile:
+        dest: /usr/local/hadoop/etc/hadoop/workers
+        regexp: "localhost"
+        state: absent
+
+    - name: Import Hadoop configuration files
+      template:
+        src: "../config/namenode/{{ item }}.j2"
+        dest: "/usr/local/hadoop/etc/hadoop/{{ item }}"
+        owner: hdfs
+        group: hadoop
+        mode: 0644
+      with_items:
+        - core-site.xml
+        - hdfs-site.xml
+
+    - name: Create working directories
+      file:
+        path: "{{ item }}"
+        group: hadoop
+        owner: hdfs
+        mode: 0755
+        state: directory
+      with_items:
+        - "{{ hadoop_namenode_path }}"
+        - "{{ hadoop_tmp_path }}"
