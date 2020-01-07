@@ -48,13 +48,17 @@ hdfs dfs -put test.txt /raw
 hdfs dfs -ls -R /
 ```
 
+Hadoop offers a dashboard with a node overview and low-level health statistics through a web-interface:
+
+```md
+# HDFS web interface at
+http://<master-ip>:9870
+```
+
 If you need to reset Hadoop, there is a playbook for that as well:
 
 ```
-# stop daemons on the namenode
-stop-dfs.sh
-
-# on your local machine, run the playbook
+# reset HDFS
 ansible-playbook playbooks/reset-hadoop.yml -i inventory
 ```
 

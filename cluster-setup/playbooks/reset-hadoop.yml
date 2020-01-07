@@ -1,7 +1,13 @@
 ---
+- hosts: masters
+  tasks:
+    - name: stop hdfs daemons
+      shell: /usr/local/hadoop/sbin/stop-dfs.sh
+      become_user: hdfs
+
+
 - hosts: hadoop
   become: yes
-
   tasks:
     - name: Delete working directories
       file:
@@ -12,7 +18,11 @@
         - /usr/local/hadoop/datanode
         - /usr/local/hadoop/tmp
 
-    - name: Re-create working directories
+
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Re-create working directories on master
       file:
         path: "{{ item }}"
         state: directory
@@ -21,5 +31,18 @@
         mode: 0755
       with_items:
         - /usr/local/hadoop/namenode
+        - /usr/local/hadoop/tmp
+
+- hosts: workers
+  become: yes
+  tasks:
+    - name: Re-create working directories on workers
+      file:
+        path: "{{ item }}"
+        state: directory
+        group: hadoop
+        owner: hdfs
+        mode: 0755
+      with_items:
         - /usr/local/hadoop/datanode
         - /usr/local/hadoop/tmp
