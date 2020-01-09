@@ -1,0 +1,21 @@
+<configuration>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:{{ hadoop_namenode_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.blocksize</name>
+        <value>{{ hadoop_blocksize_bytes }}</value>
+    </property>
+
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:{{ hadoop_datanode_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ hadoop_default_replication_factor }}</value>
+    </property>
+</configuration>

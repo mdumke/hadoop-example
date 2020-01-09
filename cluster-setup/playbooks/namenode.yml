@@ -21,17 +21,6 @@
         regexp: "localhost"
         state: absent
 
-    - name: Import Hadoop configuration files
-      template:
-        src: "../config/namenode/{{ item }}.j2"
-        dest: "/usr/local/hadoop/etc/hadoop/{{ item }}"
-        owner: hdfs
-        group: hadoop
-        mode: 0644
-      with_items:
-        - core-site.xml
-        - hdfs-site.xml
-
     - name: Create working directories
       file:
         path: "{{ item }}"

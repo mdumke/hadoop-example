@@ -56,20 +56,42 @@
     - name: Fetch hdfs user's key
       fetch:
         src: /home/hdfs/.ssh/id_rsa.pub
-        dest: "tmp/{{ ansible_host }}-id_rsa.pub"
+        dest: "tmp/hdfs/{{ ansible_host }}-id_rsa.pub"
         flat: yes
 
     - name: Distribute hdfs user's key
       authorized_key:
         user: hdfs
         state: present
-        key: "{{ lookup('file', 'tmp/{{ item }}-id_rsa.pub') }}"
+        key: "{{ lookup('file', 'tmp/hdfs/{{ item }}-id_rsa.pub') }}"
       with_items:
         - "{{ groups['hadoop'] }}"
 
-    - name: Remove local tmp directory
-      become: no
-      local_action: file path=tmp state=absent
+    - name: Create user yarn
+      user:
+        name: yarn
+        group: hadoop
+        create_home: yes
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
+        shell: /bin/bash
+        state: present
+        password: $1$SomeSalt$AMNSBufwlUERGdLU31xgi0 #password: hduser
+
+    - name: Fetch yarn user's key
+      fetch:
+        src: /home/yarn/.ssh/id_rsa.pub
+        dest: "tmp/yarn/{{ ansible_host }}-id_rsa.pub"
+        flat: yes
+
+    - name: Distribute yarn user's key
+      authorized_key:
+        user: yarn
+        state: present
+        key: "{{ lookup('file', 'tmp/yarn/{{ item }}-id_rsa.pub') }}"
+      with_items:
+        - "{{ groups['hadoop'] }}"
 
     - name: Check if Hadoop already exists
       stat:
@@ -119,7 +141,17 @@
         state: present
       with_items:
         - variable: HADOOP_HOME
-          value: /usr/local/hadoop
+          value: "{{ hadoop_home }}"
+        - variable: HADOOP_COMMON_HOME
+          value: "{{ hadoop_home }}"
+        - variable: HADOOP_HDFS_HOME
+          value: "{{ hadoop_home }}"
+        - variable: HADOOP_YARN_HOME
+          value: "{{ hadoop_home }}"
+        - variable: HADOOP_MAPRED_HOME
+          value: "{{ hadoop_home }}"
+        - variable: HADOOP_STREAMING_JAR
+          value: "{{ hadoop_tools }}/lib/hadoop-streaming-{{ hadoop_version }}.jar"
 
     - name: Manipulate PATH variable
       lineinfile:
@@ -131,3 +163,29 @@
         - bin
         - sbin
 
+    - name: Import Hadoop configuration files
+      template:
+        src: "../config/{{ item }}.j2"
+        dest: "/usr/local/hadoop/etc/hadoop/{{ item }}"
+        owner: hdfs
+        group: hadoop
+        mode: 0644
+      with_items:
+        - core-site.xml
+        - hdfs-site.xml
+        - yarn-site.xml
+        - mapred-site.xml
+
+    - name: Create log directories
+      file:
+        path: "{{ hadoop_home }}/logs"
+        state: directory
+        owner: hdfs
+        group: hadoop
+        mode: 0775
+
+
+  post_tasks:
+    - name: Remove local tmp directory
+      become: no
+      local_action: file path=tmp state=absent
