@@ -41,57 +41,14 @@
     - name: Create group hadoop
       group: name=hadoop state=present
 
-    - name: Create user hdfs
-      user:
-        name: hdfs
-        group: hadoop
-        create_home: yes
-        generate_ssh_key: yes
-        ssh_key_bits: 2048
-        ssh_key_file: .ssh/id_rsa
-        shell: /bin/bash
-        state: present
-        password: $1$SomeSalt$AMNSBufwlUERGdLU31xgi0 #password: hduser
-
-    - name: Fetch hdfs user's key
-      fetch:
-        src: /home/hdfs/.ssh/id_rsa.pub
-        dest: "tmp/hdfs/{{ ansible_host }}-id_rsa.pub"
-        flat: yes
-
-    - name: Distribute hdfs user's key
-      authorized_key:
-        user: hdfs
-        state: present
-        key: "{{ lookup('file', 'tmp/hdfs/{{ item }}-id_rsa.pub') }}"
+    - include_tasks: create-user.yml
+      vars:
+        username: "{{ item }}"
       with_items:
-        - "{{ groups['hadoop'] }}"
-
-    - name: Create user yarn
-      user:
-        name: yarn
-        group: hadoop
-        create_home: yes
-        generate_ssh_key: yes
-        ssh_key_bits: 2048
-        ssh_key_file: .ssh/id_rsa
-        shell: /bin/bash
-        state: present
-        password: $1$SomeSalt$AMNSBufwlUERGdLU31xgi0 #password: hduser
-
-    - name: Fetch yarn user's key
-      fetch:
-        src: /home/yarn/.ssh/id_rsa.pub
-        dest: "tmp/yarn/{{ ansible_host }}-id_rsa.pub"
-        flat: yes
-
-    - name: Distribute yarn user's key
-      authorized_key:
-        user: yarn
-        state: present
-        key: "{{ lookup('file', 'tmp/yarn/{{ item }}-id_rsa.pub') }}"
-      with_items:
-        - "{{ groups['hadoop'] }}"
+        - hdfs
+        - yarn
+        - mapred
+        - edge
 
     - name: Check if Hadoop already exists
       stat:

@@ -1,0 +1,21 @@
+---
+- hosts: hadoop
+  become: yes
+
+  tasks:
+    - name: Delete custom user accounts
+      user:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - hdfs
+        - yarn
+
+    - name: Delete obsolete home directories
+      file:
+        path: "/home/{{ item }}"
+        state: absent
+      with_items:
+        - hdfs
+        - yarn
+

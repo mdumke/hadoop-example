@@ -1,0 +1,28 @@
+---
+- name: "Create {{ username }} account"
+  user:
+    name: "{{ username }}"
+    group: hadoop
+    create_home: yes
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    shell: /bin/bash
+    state: present
+    password: $1$e6iGfuQR$7fmYSLKdyB26/kvYhJxBr1 #password: hadoop
+
+- name: "Fetch {{ username }} key"
+  fetch:
+    src: "/home/{{ username }}/.ssh/id_rsa.pub"
+    dest: "tmp/{{ username }}/{{ ansible_host }}-id_rsa.pub"
+    flat: yes
+
+- name: "Distribute {{ username }} key"
+  authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "{{ lookup('file', 'tmp/{{ username }}/{{ group_item }}-id_rsa.pub') }}"
+  loop: "{{ groups['hadoop'] }}"
+  loop_control:
+    loop_var: group_item
+

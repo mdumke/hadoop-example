@@ -95,3 +95,59 @@ start-yarn.sh
 
 We should now be able to see the two worker nodes with `yarn node -list` which will show healthy nodes. If nothing appears here, try `yarn node -list -all`.
 
+
+- TODO: start history server as mapred
+
+
+## Running an Example Job
+
+So far, we have seen the `hdfs` account that' responsible for HDFS administrative tasks, and the `yarn` account for YARN related tasks. An actual query should never be run as one of these users, but from a different account. The Ansible playbook creates a user `edge` on one of the machines and we will use this to run an example job.
+
+Before running a job as user `edge`, we need to prepare the filesystem:
+
+```sh
+# perform administrative tasks as user hdfs
+su - hdfs
+
+# assign HDFS content to the hadoop group
+hdfs dfs -chgrp -R hadoop /
+
+# create a home directory on HDFS
+hdfs dfs -mkdir -p /user/edge
+
+# hand the directory over the the user
+hdfs dfs -chown edge /user/edge
+
+# ensure traversal permissions for the hadoop group
+hdfs dfs -chmod 775 /
+```
+
+At this point, we can create a bit of test data and run a simple streaming job to make sure everything works:
+
+```sh
+# execute jobs as edge user
+su - edge
+
+# create some fake data on the local filesystem
+echo -e 'rock\npaper\nscissors' > lines_local.txt
+
+# create a data directory on HDFS
+hdfs dfs -mkdir data
+
+# store the data on HDFS in edge's home directory
+hdfs dfs -copyFromLocal lines_local.txt lines.txt
+
+# run a linecount job
+yarn jar $HADOOP_STREAMING_JAR \
+  -mapper 'wc -l' \
+  -numReduceTasks 0 \
+  -input . \
+  -output results01
+
+# inspect the results
+hdfs dfs -ls -R
+hdfs dfs -text results01/*
+```
+
+If the job ran successfully, two mappers were started that output linecounts for different parts of the input files and stored them in two output files.
+

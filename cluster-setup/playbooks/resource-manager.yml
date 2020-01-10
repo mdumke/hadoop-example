@@ -1,0 +1,23 @@
+---
+- hosts: resource_managers
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Specify worker nodes
+      lineinfile:
+        dest: /usr/local/hadoop/etc/hadoop/workers
+        regexp: "{{ item }}"
+        line: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ groups['workers'] }}"
+
+    - name: Ensure localhost is not a worker
+      lineinfile:
+        dest: /usr/local/hadoop/etc/hadoop/workers
+        regexp: "localhost"
+        state: absent
+

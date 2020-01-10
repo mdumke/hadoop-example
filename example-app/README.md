@@ -40,11 +40,11 @@ cat data/birds*.csv | sort | cut -d , -f 1 | uniq | wc -l
 
 # what are the top five most observed birds?
 cat data/birds*.csv \
-| sort \
-| cut -d , -f 1 \
-| uniq -c \
-| sort -t ' ' -k1,1 -nr \
-| head -n 5
+  | sort \
+  | cut -d , -f 1 \
+  | uniq -c \
+  | sort -t ' ' -k1,1 -nr \
+  | head -n 5
 ```
 
 Using the command line, we can create powerful streaming pipelines that can help us answer simple questions. However, more elaborate questions, for instance: how many different species are observed in each country on average, would require quite a lot of effort to answer in this way. Moreover, what if our data does not neatly fit onto a single computer? It seems we need to take this a step further and if we want to handle massive amounts of distributed data at some point - enter MapReduce.
@@ -144,10 +144,10 @@ The code for the previously described map and reduce steps can be found in [mapp
 ```sh
 # average species per country
 cat data/birds*.csv \
-| scripts/mapper.py \
-| sort \
-| scripts/reducer-count.py \
-| scripts/reducer-mean.py
+  | scripts/mapper.py \
+  | sort \
+  | scripts/reducer-count.py \
+  | scripts/reducer-mean.py
 ```
 
 Notice the `sort` operation is necessary for the first reducer the work - it expects all observations for one country to be consecutive. Notice also how we *chained* the second reducer to the first. In many analytics scenarios, more complex questions are answered by building long chaings and even trees of map and reduce steps that build upon one another.
