@@ -1,0 +1,84 @@
+---
+# Stop HDFS namenode
+- hosts: namenode1
+
+  vars_files:
+    - ../vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: hdfs
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Stop namenode
+      shell: >
+        source /etc/profile &&
+        hdfs --daemon stop namenode
+      args:
+        executable: /bin/bash
+
+
+# Stop HDFS datanodes
+- hosts: workers
+
+  vars_files:
+    - ../vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: hdfs
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Stop datanode
+      shell: >
+        source /etc/profile &&
+        hdfs --daemon stop datanode
+      args:
+        executable: /bin/bash
+
+
+# Stop YARN resource manager
+- hosts: resource_manager1
+
+  vars_files:
+    - ../vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: yarn
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Stop resource manager
+      shell: >
+        source /etc/profile &&
+        yarn --daemon stop resourcemanager
+      args:
+        executable: /bin/bash
+
+
+# Stop YARN node managers
+- hosts: workers
+
+  vars_files:
+    - ../vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: yarn
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Stop node manager
+      shell: >
+        source /etc/profile &&
+        yarn --daemon stop nodemanager
+      args:
+        executable: /bin/bash
+

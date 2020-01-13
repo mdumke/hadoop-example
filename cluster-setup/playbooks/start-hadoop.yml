@@ -1,0 +1,96 @@
+---
+# Start HDFS namenode
+- hosts: namenode1
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: hdfs
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Start namenode
+      shell: >
+        source /etc/profile &&
+        hdfs --daemon start namenode
+      args:
+        executable: /bin/bash
+      register: info
+      failed_when: >
+        info.stderr and 'namenode is running' not in info.stderr
+
+
+# Start HDFS datanodes
+- hosts: workers
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: hdfs
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Start datanode
+      shell: >
+        source /etc/profile &&
+        hdfs --daemon start datanode
+      args:
+        executable: /bin/bash
+      register: info
+      failed_when: >
+        info.stderr and 'datanode is running' not in info.stderr
+
+
+# Start YARN resource manager
+- hosts: resource_manager1
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: yarn
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Start resource manager
+      shell: >
+        source /etc/profile &&
+        yarn --daemon start resourcemanager
+      args:
+        executable: /bin/bash
+      register: info
+      failed_when: >
+        info.stderr and 'resourcemanager is running' not in info.stderr
+
+
+# Start YARN node managers
+- hosts: workers
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    ansible_become: yes
+    ansible_become_user: yarn
+    ansible_become_method: su
+    ansible_become_pass: hadoop
+
+  tasks:
+    - name: Start node manager
+      shell: >
+        source /etc/profile &&
+        yarn --daemon start nodemanager
+      args:
+        executable: /bin/bash
+      register: info
+      failed_when: >
+        info.stderr and 'nodemanager is running' not in info.stderr
+
