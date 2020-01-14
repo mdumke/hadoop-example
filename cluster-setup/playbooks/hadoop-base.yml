@@ -1,0 +1,24 @@
+---
+- hosts: hadoop
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Update cache if necessary
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400
+
+  roles:
+    - java8
+    - cluster-communication
+    - account-creation
+    - hadoop-download
+    - hadoop-config
+
+  post_tasks:
+  - name: remove local tmp directory
+    become: no
+    local_action: file path=tmp state=absent

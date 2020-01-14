@@ -1,7 +1,7 @@
-[namenode1]
+[namenode]
 192.168.50.2
 
-[resource_manager1]
+[resource_manager]
 192.168.50.5
 
 [workers]
@@ -11,15 +11,9 @@
 [edge]
 192.168.50.6
 
-[namenodes:children]
-namenode1
-
-[resource_managers:children]
-resource_manager1
-
 [masters:children]
-namenodes
-resource_managers
+namenode
+resource_manager
 
 [hadoop:children]
 masters

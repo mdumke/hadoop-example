@@ -1,27 +1,15 @@
 ---
-- hosts: masters
+- hosts: namenode
   become: yes
 
   vars_files:
     - vars.yml
 
+  roles:
+    - master-node
+
   tasks:
-    - name: Specify worker nodes
-      lineinfile:
-        dest: /usr/local/hadoop/etc/hadoop/workers
-        regexp: "{{ item }}"
-        line: "{{ item }}"
-        state: present
-      with_items:
-        - "{{ groups['workers'] }}"
-
-    - name: Ensure localhost is not a worker
-      lineinfile:
-        dest: /usr/local/hadoop/etc/hadoop/workers
-        regexp: "localhost"
-        state: absent
-
-    - name: Create working directories
+    - name: Create HDFS working directories
       file:
         path: "{{ item }}"
         group: hadoop

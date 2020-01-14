@@ -1,0 +1,66 @@
+---
+- name: Let Hadoop know about Java
+  lineinfile:
+    dest: /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+    regexp: "^export JAVA_HOME"
+    line: "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
+    state: present
+
+- name: Create /etc/profile.d/hadoop.sh
+  file:
+    path: /etc/profile.d/hadoop.sh
+    group: root
+    owner: root
+    mode: 0644
+    state: touch
+
+- name: Set Hadoop environment variables
+  lineinfile:
+    dest: /etc/profile.d/hadoop.sh
+    regexp: "^export {{ item.variable }}"
+    line: "export {{ item.variable }}={{ item.value }}"
+    state: present
+  with_items:
+    - variable: HADOOP_HOME
+      value: "{{ hadoop_home }}"
+    - variable: HADOOP_COMMON_HOME
+      value: "{{ hadoop_home }}"
+    - variable: HADOOP_HDFS_HOME
+      value: "{{ hadoop_home }}"
+    - variable: HADOOP_YARN_HOME
+      value: "{{ hadoop_home }}"
+    - variable: HADOOP_MAPRED_HOME
+      value: "{{ hadoop_home }}"
+    - variable: HADOOP_STREAMING_JAR
+      value: "{{ hadoop_tools }}/lib/hadoop-streaming-{{ hadoop_version }}.jar"
+
+- name: Manipulate PATH variable
+  lineinfile:
+    dest: /etc/profile.d/hadoop.sh
+    regexp: "^export PATH=$PATH:$HADOOP_HOME/{{ item }}"
+    line: "export PATH=$PATH:$HADOOP_HOME/{{ item }}"
+    state: present
+  with_items:
+    - bin
+    - sbin
+
+- name: Import Hadoop configuration files
+  template:
+    src: "../config/{{ item }}.j2"
+    dest: "/usr/local/hadoop/etc/hadoop/{{ item }}"
+    owner: hdfs
+    group: hadoop
+    mode: 0644
+  with_items:
+    - core-site.xml
+    - hdfs-site.xml
+    - yarn-site.xml
+    - mapred-site.xml
+
+- name: Create log directories
+  file:
+    path: "{{ hadoop_home }}/logs"
+    state: directory
+    owner: hdfs
+    group: hadoop
+    mode: 0775

@@ -25,4 +25,4 @@
   loop: "{{ groups['hadoop'] }}"
   loop_control:
     loop_var: group_item
-
+  notify: remove local tmp directory

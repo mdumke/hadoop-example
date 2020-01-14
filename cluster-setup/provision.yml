@@ -1,8 +1,7 @@
 ---
-- import_playbook: playbooks/main.yml
+- import_playbook: playbooks/hadoop-base.yml
 - import_playbook: playbooks/namenode.yml
 - import_playbook: playbooks/datanode.yml
 - import_playbook: playbooks/resource-manager.yml
 - import_playbook: playbooks/node-manager.yml
-- import_playbook: playbooks/start-hadoop.yml
 

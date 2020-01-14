@@ -1,0 +1,25 @@
+---
+- name: Check if Hadoop already exists
+  stat:
+    path: /usr/local/hadoop/README.txt
+  register: hadoop
+
+- name: Download Hadoop
+  when: hadoop.stat.exists == false
+  get_url:
+    url: "{{ hadoop_download_url }}"
+    dest: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+    checksum: "{{ hadoop_checksum }}"
+
+- name: Unpack Hadoop
+  when: hadoop.stat.exists == false
+  unarchive:
+    src: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+    dest: /usr/local
+    group: hadoop
+    owner: hdfs
+    remote_src: yes
+
+- name: Rename Hadoop for easier access
+  when: hadoop.stat.exists == false
+  command: "mv /usr/local/hadoop-{{ hadoop_version }} /usr/local/hadoop"

@@ -1,6 +1,6 @@
 ---
 # Stop HDFS namenode
-- hosts: namenode1
+- hosts: namenode
 
   vars_files:
     - ../vars.yml
@@ -42,7 +42,7 @@
 
 
 # Stop YARN resource manager
-- hosts: resource_manager1
+- hosts: resource_manager
 
   vars_files:
     - ../vars.yml

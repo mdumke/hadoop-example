@@ -1,0 +1,12 @@
+---
+- name: Create group hadoop
+  group: name=hadoop state=present
+
+- include_tasks: create-user.yml
+  vars:
+    username: "{{ item }}"
+  with_items:
+    - hdfs
+    - yarn
+    - mapred
+    - edge
