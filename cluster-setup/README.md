@@ -1,5 +1,4 @@
 # Hadoop Cluster Setup
-
 After exploring a [pseudo distributed setup](../pseudo-distributed-setup/) with multiple services running on a single machine, it's time to consider how to install a proper Hadoop cluster spanning multiple actual nodes. We'll continue to do the installation from scratch using Hadoop binaries to get a better understanding of the framework's moving pieces, even though for a production setup it is advisable to use a management service like [Ambari](...) or even a third party provided distribution.
 
 ```md
@@ -8,7 +7,7 @@ After exploring a [pseudo distributed setup](../pseudo-distributed-setup/) with 
 Virtualbox >= 5.1.28
 Vagrant >= 2.2.6
 Python >= 3.6
-Ansible >= 2.0.2
+Ansible >= 2.9.2
 ```
 
 One thing to take note of: while the previous setup was discussed in terms of raw command line execution on a Debian machine, we will use [Ansible](...) for this one. This is because first of all executing the same commands on multiple machines becomes tedious very quickly, and secondly, the Ansible script itself can serve as documentation.
@@ -17,7 +16,6 @@ For this discussion, we will use multiple virtual machines that run on our compu
 
 
 ## Quick Start
-
 Since all steps to prepare a simple setup are specified in our Ansible playbooks already, it should be a matter of booting up the VMs and provisioning them using Ansible:
 
 ```sh
@@ -34,7 +32,6 @@ In the following, we'll discuss the setup in some detail.
 
 
 ## Preparing Virtual Machines
-
 According to the Hadoops official [cluster installation guide](...), we will want to
 
 - run the HDFS *namenode* process on a dedicated machine
@@ -84,7 +81,6 @@ With this, our infrastructure is ready for provisioning.
 
 
 ## Installing Hadoop
-
 Ansible's main entry point is [provision.yml](./provision.yml). In here, we see an overview over the tasks to be performed. There is some setup that needs to be done on every machine in our cluster first, and then some role-specific setup.
 
 Looking at [hadoop-base.yml](./playbooks/hadoop-base.yml), the first interesting reference is to [vars.yml](./playbooks/vars.yml). This is the central place for basic installation options. Here, we can specify which Hadoop version we want to use, the download path, where Hadoop is going to live on our machines, and so on.
@@ -112,7 +108,6 @@ So far, Hadoop is downloaded, environments are prepared and working directories 
 
 
 ## Hadoop Configuration
-
 All configuration files can be found in the [config](./config/) directory. Hadoop has some default configuration, but this can be overwritten in site-specific, i.e. role-specific, files. Hadoop configuration is designed such that the same set of configuration files can be deployed to every machine and the respective roles will only care about what is relevant for them. Let's take a look at a few details.
 
 In [core-site.xml](./config/core-site.xml) we most importantly specify the address of the filesystem:
@@ -167,13 +162,21 @@ Without these values, the node managers will not be able to estimate available r
 
 Finally, we prepare [mapred-site.xml](./config/mapred-site.xml) as suggested in the official setup guide.
 
+From here on out, it's the same two steps as in the [Quick Start](...) section above: start up your VMs and run the provisioning playbook with Ansible.
+
+```sh
+# start virtual machines
+vagrant up
+
+# run the ansible playbook
+ansible-playbook provision.yml -i inventories/local
+```
+
 
 ## Running Hadoop
-
 Assuming you started from scratch as we did here, you should now have a clean and readily configured minimal cluster installation of Hadoop running. We cannot do much with it yet, however, without first starting the respective daemon processes. Let's take this opportunity to get more familiar with the different nodes and accounts we have created.
 
 ### HDFS
-
 As stated above, it is best practice to run HDFS processes as the user `hdfs`. Whoever starts these processes will automatically be considered superuser and have access to all of HDFS, so this account should exclusively be used for management tasks.
 
 To start up HDFS, let's enter the namenode, switch to the `hdfs` user account (the password for every account is `hadoop`) and see if the environment is properly prepared:
@@ -247,8 +250,7 @@ For a little experimentation, try stopping the datanode process on one of the wo
 Let's clean up our test data for good measure. We remove the test file locally (`rm test.txt`) as well as from HDFS. The latter can be achieved either from the command line via `hdfs dfs -rm /raw/test.txt` or - why not - through the file explorer avaliable in the web interface. HDFS is ready.
 
 
-## YARN
-
+### YARN
 The provisioning script sets up YARN as well, Hadoop's default resource scheduling application. YARN has two roles: a *resource manager* that is responsible for overall scheduling and job assignment, and a *node manager* that is responsible for the resources of a single worker node. As the documentation suggests, we run the resource manager on its own machine and start it as the user `yarn`:
 
 ```sh
@@ -272,7 +274,6 @@ We should now be able to see the two worker nodes with `yarn node -list` which w
 
 
 ## Running an Example Job
-
 So far, we have seen the `hdfs` account that's responsible for HDFS administrative tasks, and the `yarn` account for YARN related tasks. An actual query should never be run as one of these users, but from a different account. The Ansible playbook creates a user `edge` on one of the machines and we will use this to run an example job.
 
 Before running a job as user `edge`, we need to prepare the filesystem, which we will do using the `hdfs` account:
@@ -341,7 +342,6 @@ hdfs dfs -rm -r results01
 
 
 ## Summary and Outlook
-
 We have deployed a minimal Hadoop cluster with two worker nodes on a couple of VMs. We have started HDFS daemons (as user `hdfs`) and YARN daemons (as user `yarn`) and we have executed a MapReduce job as a regular user `edge` on a separate edge node.
 
 This setup was not concerned with security of even high availability and there are loads of topics we have not even touched upon, let alone all the many services that make up the Hadoop environment like Spark and Hive and HBase, to name some common ones. But we have seen some of the moving parts of the Hadoop core framework and are hopefully in a better position now to gauge which tasks installation managers like Ambari need perform.
