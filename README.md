@@ -11,6 +11,6 @@ Storage and execution are the two core concerns of *HDFS*, the *Hadoop Distribut
 
 When learning about a piece of technology, it's often a good idea to prepare a clean setup and start playing around with it. While we can discuss Hadoop in greater detail later on, let's see if we can get through the installation and configuration process for running Hadoop inside a single virtual machine.
 
-[Single Node Setup](./single-node-setup/)
+[Single Node Setup](./1-single-node-setup/)
 
 If you've made it through this section, you now have a running, albeit basic, Hadoop installation, and you have seen HDFS's *NameNode* and *DataNode* in action, as well als YARN's *ResourceManager* and *NodeManager* processes.
