@@ -112,7 +112,7 @@ Hadoop is actually a suite of services. Let's start a few of those and see what 
 But first of all, Hadoop needs a place to store logs, temporary files and manage processes. While there are common places for these tasks on Unix file systems, we want to keep everything in one place for now so we can quickly see how Hadoop is working and what kind of management data it produces. To this end, we create subdirectories inside the hadoop home directory for everything we need:
 
 ```sh
-# create auxilliary directories
+# create auxiliary directories
 
 mkdir $HADOOP_HOME/tmp
 mkdir $HADOOP_HOME/logs
@@ -122,7 +122,7 @@ mkdir $HADOOP_HOME/proc
 Now let's tell Hadoop about these in `hadoop-env.sh`:
 
 ```sh
-# inform hadoop about auxilliary directories
+# inform hadoop about auxiliary directories
 
 export HADOOP_LOG_DIR=${HADOOP_HOME}/logs
 export HADOOP_PID_DIR=${HADOOP_HOME}/proc
@@ -136,7 +136,7 @@ The temporary directory is not specified in this file, but along with other mach
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
+        <value>hdfs://192.168.60.2:9000</value>
     </property>
 
     <property>
@@ -152,7 +152,7 @@ By the way, all the many configuration options, together with their default valu
 
 
 ### HDFS
-Next, we turn to HDFS and the services that run the distributed filesystem. On HDFS, as on most other filesystems, the file metadata and the actual file contents are stored separately. What's special about HDFS is that the metadata typically is stored on a dedicated machine and managed by a dedicated process, the *NameNode*. The data itself is stored on *DataNodes*. Let's create a place for the Hadoop processes to store their information:
+Next, we turn to HDFS and the services that run the distributed file system. On HDFS, as on most other file systems, the file metadata and the actual file contents are stored separately. What's special about HDFS is that the metadata typically is stored on a dedicated machine and managed by a dedicated process, the *NameNode*. The data itself is stored on *DataNodes*. Let's create a place for the Hadoop processes to store their information:
 
 ```sh
 # create places for hadoop to store information
@@ -186,10 +186,10 @@ Because these paths might change from machine to machine (not actually recommend
 
 There is another important point to notice here. Since we are setting up Hadoop on a single machine and we'll only have a single *DataNode*, we cannot actually make use of it's replication capabilities (let alone the powerful [erasure coding](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/HDFSErasureCoding.html), which was added in Hadoop 3). This is why we set the default replication factor to one.
 
-With this configuration, we are ready to start up the HDFS processes. As with other filesystems, HDFS needs to be formatted before we can use it.
+With this configuration, we are ready to start up the HDFS processes. As with other file systems, HDFS needs to be formatted before we can use it.
 
 ```sh
-# prepare hdfs filesystem
+# prepare hdfs file system
 hdfs namenode -format
 
 # start hdfs processes
@@ -229,7 +229,7 @@ hdfs --help
 hdfs dfs --help
 ```
 
-The example shows how we can treat HDFS has a type of filesystem and how we can interact with it through a command line client. Other clients have been implemented as well, including a HTTP-based REST API via [WebHDFS](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
+The example shows how we can treat HDFS has a type of file system and how we can interact with it through a command line client. Other clients have been implemented as well, including a HTTP-based REST API via [WebHDFS](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
 
 Notice that the *NameNode* exposes a low-level health monitor through a web interface, by default at port 9870. If you haven't changed the infrastructure setup, the interface will be available at:
 
@@ -238,11 +238,11 @@ Notice that the *NameNode* exposes a low-level health monitor through a web inte
 http://192.168.60.2:9870
 ```
 
-We shall come back to HDFS at a later point and explore it's workings in a bit more depth. For now, let's turn our attention to YARN and see how it can run jobs on the distributed filesystem.
+We shall come back to HDFS at a later point and explore it's workings in a bit more depth. For now, let's turn our attention to YARN and see how it can run jobs on the distributed file system.
 
 
 ### YARN
-In version 1 of Hadoop, the MapReduce execution pattern and resource scheduling for the distributed *DataNodes* were at the heart of the framework. With Hadoop 2, they became modules that could be replaced by alternative approaches or implementations. For instance, Hadoop users could now use [Apache Mesos](http://mesos.apache.org/) for resource management. We are not going to explore these options here.
+In version 1 of Hadoop, the *MapReduce* execution pattern and resource scheduling for the distributed *DataNodes* were at the heart of the framework. With Hadoop 2, they became modules that could be replaced by alternative approaches or implementations. For instance, Hadoop users could now use [Apache Mesos](http://mesos.apache.org/) for resource management. We are not going to explore these options here.
 
 YARN is responsible for keeping track of which compute resources are available throughout the cluster and for scheduling job execution accordingly.
 
@@ -275,7 +275,7 @@ According to the documentation, we need to whitelist a few environment variables
 </configuration>
 ```
 
-For YARN itself, we need to set a shuffle handler explicitely. The shuffle phase is typically the most resource-intensive part of a MapReduce job, and there are different handler implementations. Let's go with the default option.
+For YARN itself, we need to set a shuffle handler explicitly. The shuffle phase is typically the most resource-intensive part of a MapReduce job, and there are different handler implementations. Let's go with the default option.
 
 ```xml
 <!-- yarn-site.xml -->
@@ -313,7 +313,7 @@ http://192.168.60.2:8088
 
 The dashboard does not tell us too many interesting things at this point because we haven't done anything yet. Let's run a little job with YARN to try out if the setup works.
 
-A very straight forward way to work with Hadoop is to have it stream the output of files to STDOUT, from where it can be read and processed with command line tools. The listing below shows another session with Hadoop, assuming the previous state is still present, including a test file on HDFS:
+A very straight forward way to work with Hadoop is to have it stream the output of files to `STDOUT`, from where it can be read and processed with command line tools. The listing below shows another session with Hadoop, assuming the previous state is still present, including a test file on HDFS:
 
 ```sh
 # go to the project directory
@@ -338,7 +338,7 @@ hdfs dfs -cat /job_output/part-00000
 hdfs dfs -text /job_output/*
 ```
 
-If the job runs as expected, it produces two files in a newly created `job_output` directory. These contain linecounts for different parts of the input file. Adding up these numbers should tell us the total number of lines in the `sample.txt` file. You can also inspect the job now on `http://192.168.60.2:8088`.
+If the job runs as expected, it produces two files in a newly created `job_output` directory. These contain line counts for different parts of the input file. Adding up these numbers should tell us the total number of lines in the `sample.txt` file. You can also inspect the job now on `http://192.168.60.2:8088`.
 
 Just showing this example will naturally raise more questions than it answers about YARN and MapReduce, but further explanation will have to wait until later. All we wanted to do here was run a very simple job as a kind of smoke test for our setup.
 
