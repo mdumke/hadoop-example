@@ -1,13 +1,16 @@
-# Hadoop Experiments
+# Exploring Hadoop
+Apache [Hadoop](...) is currently the most widely used open source framework for storing massive amounts of data and performing analytics operations on them. It has quite a number of moving pieces, however, and can be a bit daunting to approach, especially with dozens of additional services that can all be part of the wider *ecosystem*.
 
-Let's get familiar with Hadoop and parts of its ecosystem. Before diving into the hardware setup, you might want to get a basic understanding of *MapReduce*, Hadoop's central execution pattern. Here it is introduced in the context of an example application that will be used later on:
+The purpose of the text and code presented here is to get familiar with a few central aspects of the core Hadoop framework and start playing around with it.
 
-[Example Application](example-app/)
 
-We'll start the process of building the hardware setup simple, by running Hadoop in a single Java process using data on our system's regular old file system in a
+## A First Installation
+Hadoop is a distributed filesystem, designed for holding very large files. It is optimized for read and append operations on these files. Furthermore, it supports the distributed execution of code across many machines in parallel.
 
-[Single Process Setup](single-process-setup/)
+Storage and execution are the two core concerns of *HDFS*, the *Hadoop Distributed FileSystem*, and *YARN*, *Yet Another Resource Negotiator*, respectively. A simple workflow would be to take some data, store it on HDFS, then use YARN to run a piece of code to extract some information from the data.
 
-A more advanced setup brings more parts of Hadoop into play, each running in a dedicated process, but still on just one machine. This is the
+When learning about a piece of technology, it's often a good idea to prepare a clean setup and start playing around with it. While we can discuss Hadoop in greater detail later on, let's see if we can get through the installation and configuration process for running Hadoop inside a single virtual machine.
 
-[Pseudo-Distributed Setup](single-node-setup-bkp)
+[Single Node Setup](./single-node-setup/)
+
+If you've made it through this section, you now have a running, albeit basic Hadoop installation, and you have seen HDFS's *NameNode* and *DataNode* in action, as well als YARN's *ResourceManager* and *NodeManager* processes.

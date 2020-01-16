@@ -1,5 +1,5 @@
 # Hadoop Single Node Setup
-Without worrying too much about conceptual details upfront, let's install Hadoop 3.2.1 through its binaries and see how far we get with playing around a little bit. For the main part, we will follow the [official guide](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html) for setting up Hadoop on a single computer.
+Without worrying too much about conceptual details upfront, let's install Hadoop 3.2.1 through its binaries and see how far we get with playing around a little bit. We will, in broad steps, follow the [official guide](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html) for setting up Hadoop on a single computer.
 
 ```md
 # prerequisites
@@ -7,6 +7,8 @@ Without worrying too much about conceptual details upfront, let's install Hadoop
 Vagrant >= 2.2.6
 VirtualBox >= 5.1.38
 ```
+
+At the time of this writing in early 2020, Hadoop 3.2.1 is the latest version of the framework. Please be aware that some details of the installation process may change if you decide to select a different version.
 
 
 ## Preparing a Virtual Machine
@@ -242,7 +244,7 @@ We shall come back to HDFS at a later point and explore it's workings in a bit m
 ### YARN
 In version 1 of Hadoop, the MapReduce execution pattern and resource scheduling for the distributed *DataNodes* were at the heart of the framework. With Hadoop 2, they became modules that could be replaced by alternative approaches or implementations. For instance, Hadoop users could now use [Apache Mesos](http://mesos.apache.org/) for resource management. We are not going to explore these options here.
 
-YARN (*Yet-Another-Resource-Negotiator*) is responsible for keeping track of which compute resources are available throughout the cluster and for scheduling job execution accordingly.
+YARN is responsible for keeping track of which compute resources are available throughout the cluster and for scheduling job execution accordingly.
 
 We'll begin its configuration by specifying two important environment variables:
 
