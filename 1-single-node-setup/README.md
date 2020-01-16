@@ -1,5 +1,5 @@
 # Hadoop Single Node Setup
-Without worrying too much about conceptual details upfront, let's install Hadoop 3.2.1 through its binaries and see how far we get with playing around a little bit. We will, in broad steps, follow the [official guide](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html) for setting up Hadoop on a single computer.
+Without worrying too much about conceptual details upfront, let's install Hadoop 3.2.1 through its binaries and see how far we get with playing around a little bit. In broad outline, we will follow the [official guide](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html) for setting up Hadoop on a single computer.
 
 ```markdown
 # prerequisites
@@ -8,13 +8,13 @@ Vagrant >= 2.2.6
 VirtualBox >= 5.1.38
 ```
 
-At the time of this writing in early 2020, Hadoop 3.2.1 is the latest version of the framework. Please be aware that some details of the installation process may change if you decide to select a different version.
+At the time of this writing, in early 2020, Hadoop 3.2.1 is the latest version of the framework. Please be aware that some details of the installation process may change if you decide to select a different version.
 
 
 ## Preparing a Virtual Machine
-We start from scratch using a fresh installation of Ubuntu 18.04 on a virtual machine. The examples will use Vagrant with VirtualBox to create a local setup, which is fast and free of charge. Of course, you can also use a different provider (e.g. AWS or DigitalOcean), or even follow along on your local computer.
+We start from scratch using a fresh installation of Ubuntu 18.04 on a virtual machine. The examples will use Vagrant with VirtualBox to create a local setup, which is fast and free of charge. Of course, you can also use a different provider (e.g. AWS or DigitalOcean).
 
-A few details about our VM are specified in the [Vagrantfile](./Vagrantfile). In particular, we'll use a single machine with 4GB of memory, which is enough to run a few of the Hadoop processes, and we configure it with a local network for host-only communication, so we can access the VM from our local machine easily. Start the machine:
+A few details about our VM are specified in the [Vagrantfile](./Vagrantfile). In particular, we'll use a single machine with 4GB of memory, which is enough to run a few of the Hadoop processes, and we configure it with a local network for host-only communication, so we can access the VM from our local machine conveniently. Start the machine:
 
 ```sh
 # initialize the virtual machine
@@ -50,7 +50,7 @@ sudo mv hadoop-3.2.1 /usr/local/hadoop
 
 
 ## Installing Java 8
-If we take a look at what we have just downloaded and unpacked, we see that there are some binaries files in `bin/` and `sbin/` (in the following, relative paths will refer to `/usr/local/hadoop`. However, if we try to run the hadoop command, it will complain about a missing Java installation:
+If we take a look at what we have just downloaded and unpacked, we see that there are some binaries files in `bin/` and `sbin/` (here and in the following, relative paths will refer to `/usr/local/hadoop`). However, if we try to run the hadoop command, it will complain about a missing Java installation:
 
 ```sh
 # hadoop needs to know Java
@@ -93,7 +93,7 @@ export PATH=$HADOOP_HOME/bin:$PATH
 export PATH=$HADOOP_HOME/sbin:$PATH
 ```
 
-Now, log out and back into the terminal to make the variables available, or run `source /etc/profile.d/hadoop.sh`. After that, `echo $HADOOP_HOME` should display the correct value, and the following command succeeds:
+Now, log out and back into the terminal to make the variables available, or run `source /etc/profile.d/hadoop.sh`. After that, `echo $HADOOP_HOME` should display the correct value, and the following commands succeeds:
 
 ```sh
 # see if commands are available
@@ -141,7 +141,7 @@ The temporary directory is not specified in this file, but along with other mach
 
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>$HADOOP_HOME/tmp</value>
+        <value>/usr/local/hadoop/tmp</value>
     </property>
 </configuration>
 ```
@@ -155,7 +155,7 @@ By the way, all the many configuration options, together with their default valu
 Next, we turn to HDFS and the services that run the distributed file system. On HDFS, as on most other file systems, the file metadata and the actual file contents are stored separately. What's special about HDFS is that the metadata typically is stored on a dedicated machine and managed by a dedicated process, the *NameNode*. The data itself is stored on *DataNodes*. Let's create a place for the Hadoop processes to store their information:
 
 ```sh
-# create places for hadoop to store information
+# create hadoop working directories
 
 mkdir $HADOOP_HOME/namenode
 mkdir $HADOOP_HOME/datanode
@@ -169,12 +169,12 @@ Because these paths might change from machine to machine (not actually recommend
 <configuration>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>$HADOOP_HOME/namenode</value>
+        <value>/usr/local/hadoop/namenode</value>
     </property>
 
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>$HADOOP_HOME/datanode</value>
+        <value>/usr/local/hadoop/datanode</value>
     </property>
 
     <property>
@@ -204,7 +204,7 @@ The `jps` command line tool comes as part of the Java SDK. It lists running Java
 
 Before we move on to YARN, let's run a few commands on HDFS and store some data on it to get a first impression of how the service works. The following listing displays a brief session with HDFS.
 
-```sh
+```bash
 # create a working directory
 mkdir ~/hadoop && cd ~/hadoop
 
@@ -346,6 +346,7 @@ For now, let's clean up after ourselves:
 
 ```sh
 # remove example data from hdfs
+
 hdfs dfs -rm -r /data
 hdfs dfs -rm -r /tmp
 hdfs dfs -rm -r /job_output
