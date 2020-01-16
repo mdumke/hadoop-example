@@ -1,7 +1,7 @@
 # Hadoop Single Node Setup
 Without worrying too much about conceptual details upfront, let's install Hadoop 3.2.1 through its binaries and see how far we get with playing around a little bit. We will, in broad steps, follow the [official guide](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html) for setting up Hadoop on a single computer.
 
-```md
+```markdown
 # prerequisites
 
 Vagrant >= 2.2.6
