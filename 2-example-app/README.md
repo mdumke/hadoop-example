@@ -105,7 +105,13 @@ In our examples, we have not encountered any key/value pairs because counting ch
 
 The formalization using key/value pairs as well as the application of reducers to intermediate results with identical keys is where Google's *MapReduce* pattern goes beyond the *mappers* and *reducers* we know from functional programming.
 
-In the next section, we will take a look at the whole framework and try to answer our open question from before that was too complicated for a simple Unix pipeline.
+In the next section, we will take a look at the whole framework and try to answer our open question from before that was too complicated for a simple Unix pipeline. Before that, however, let us briefly reflect on how this pattern might lend itself to parallel execution.
+
+![Map Reduce illustration](map-reduce.png "Figure 1: Distributed Map Reduce")  
+
+*Figure 1: Distributed Map Reduce Process. Multiple nodes perform a mapping operation in parallel. Only the results need to travel across the network to be aggregated in the final reduce step.*
+
+The map operation is a transformation of one piece of information into another. It is fully determined by the transformation function and does not need to know anything about the rest of the data. Because of this independence, a data set can be split into multiple pieces and the mapping can be performed on each of them in parallel on multiple machines. If we assume for a moment that counting the length of words was a very time consuming operation, we see how the above job could get a performance increase if many computers were working on it in parallel. After the map step, the intermediate results (the character counts), could be collected to be summed up, as figure 1 illustrates.
 
 
 ## Counting Birds with MapReduce
@@ -223,7 +229,7 @@ Notice how this function only works if the input is sorted by country. Once a ne
 
 There are many ways to implement functionality like this, why did we chose a way that depends on the input being sorted? Isn't that unnecessary overhead - sorting can be a very expensive operation, especially with distributed data.
 
-Remember that we are preparing to deal with massive amounts of data. With our example application, we will never have more than about 250 different countries in our dataset and there won't be a million different species of bird. But assume for a amoment, this did happen. Our reducer would then have to go through *all* the data, preparing counts for *all* countries and *all* species before starting to produce output. That can become problematic for two reasons:
+Remember that we are preparing to deal with massive amounts of data. With our example application, we will never have more than about 250 different countries in our dataset and there won't be a million different species of bird. But assume for a moment this did happen. Our reducer would then have to go through *all* the data, preparing counts for *all* countries and *all* species before starting to produce output. That can become problematic for two reasons:
 
 1. Data volume might just be too big to keep everything in memory.
 2. We can only start producing output when all data has been processed.
