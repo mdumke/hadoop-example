@@ -1,7 +1,7 @@
 # A Bird Tracking Example Application
-Our goal is to go over the basics of the *MapReduce*. This execution pattern was developed at Google in the early 2000s and has been taken inspiration from the `map` and `reduce` operations common in functional programming.
+Our goal is to go over the basics of the *MapReduce*. This execution pattern was developed at Google in the early 2000s and has been inspired by the `map` and `reduce` operations common in functional programming.
 
-In the following, we'll approach the pattern by seeing how it operates on data. More precisely, on test data from a tiny example application. We'll use Unix pipelines for the first steps, then switch to Python to go through some more elaborate use cases. But first, let's take a look at the application and create ourselves some fake data.
+In the following, we'll approach the pattern by observing how it operates on data. More precisely, on test data from a tiny example application. We'll use Unix pipelines for the first steps, then switch to Python to go through some more elaborate use cases. But first, let's take a look at the application and create ourselves some fake data.
 
 ```markdown
 # Prerequisites
@@ -11,9 +11,9 @@ python >= 3.6
 
 
 ## I've Just Seen a Sparrow in Italy
-Through our little application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume the app is really popular and we have collected many such observations from millions of users throughout the world.
+Through our little application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume that for some reason the app is really popular and we have collected many such observations from millions of users throughout the world.
 
-To learn more about our natural environment, we collect all the data and store it in a large csv file to run some analyses. With one observation, a `bird species` and a `country code`, per line, our data will look something like this:
+To learn more about our natural environment, we collect all the data and store it in a large csv file to run some analyses. With one observation, a `bird species` and a `country code`, per line, on without collecting any futher information for now, our data will look something like this:
 
 ```txt
 Stork,LY
@@ -24,11 +24,11 @@ Turkey,EE
 Bald eagle,BD
 ```
 
-As you see, our list is not sorted in any way, and birds and country codes can appear multiple times, and even the same bird-country combination can appear multiple times.
+As you can see, our list is not sorted in any way, and birds and country codes can appear multiple times, and even the same bird-country combination can appear multiple times.
 
 
 ## Command Line Statistics on Test Data
-To get started, we'll generate some fake data. For now, we'll use the current working directory to do some experiments, but we'll create a subdirectory for our data to keep organized. As for test data, a random combination of a bunch of birdnames and country codes should suffice for now. Use the data generator in [birds.py](scripts/birds.py) to create a set of test data:
+To get started, we generate some fake data. For now, we'll use the current working directory to do some experiments, but we'll create a subdirectory for our data to stay organized. As for test data, a random combination of a bunch of birdnames and country codes should suffice for now. Use the data generator in [birds.py](scripts/birds.py) to create a set of test data:
 
 ```sh
 # a place to keep our data
@@ -42,7 +42,7 @@ python scripts/birds.py -n 30 > data/birds2.csv
 cat data/birds*.csv | head -n 5
 ```
 
-At this point, we have simulated user activity and collected data to multiple files. These files stand for a large dataset that is split into multiple parts and distributed over multiple machines, as will likely be the case with Hadoop. But for now, it's all on our local filesystem and we can start asking some questions. The Unix command line can become a powerful analysis tool in this context.
+At this point, we have simulated user activity and collected data into multiple files. These files stand for a large dataset that is split into multiple parts and distributed across multiple machines, as will likely be the case once we start using Hadoop. But for now, it's all on our local filesystem and we can start asking some questions. The Unix command line can become a powerful analysis tool in this context.
 
 ```sh
 # how many observations do we have in total?
@@ -60,13 +60,13 @@ cat data/birds*.csv \
   | head -n 5
 ```
 
-Using the command line, we can create powerful streaming pipelines that can help us answer simple questions. However, more elaborate questions may require a lot of effort to answer in this manner. Take for instance the question: how many different species are observed in each country on average? We'd need to group birds by country, then create a sum of unique birds in each group and finally average over all these sums. And what our data is stored on multiple computers? Would we transfer it across the network to put it through our pipeline? This would become even more problematic if we want to handle massive amounts of data that could not possibly fit onto a single computer. That's where *MapReduce* enters the stage.
+Using the command line, we can create powerful streaming pipelines that can help us answer simple questions. However, more elaborate questions may require a lot of effort to answer in this manner. Take, for instance, the question: how many different species are observed in each country on average? We'd need to group birds by country, then create a sum of unique birds in each group and finally average over all these sums. And what if our data is stored on multiple computers? Would we transfer it across the network to put it through our pipeline? This would become even more problematic if we wanted to handle massive amounts of data that could not possibly fit onto a single computer. That's where *MapReduce* enters the stage.
 
 
 ## Programming with Mappers and Reducers
-Two common concepts from *functional programming* are called `map` and `reduce`, and they are often applied one after the other. Both operate on collections of data. A *mapping* replaces each item in the collection with the result of passing the item through some function. A *reduction* combines all values into a single final value.
+Two common concepts from *functional programming* are `map` and `reduce`, and they are often used together. Both operate on collections of data. A *mapping* replaces each item in the collection with another one, namely with the result of passing the item through some function. A *reduction* compresses or combines all values into an aggregate value.
 
-As an example, assume we have a list of bird names and want to count the total number of characters used in this list. One way to do this would be to loop through all the names and add the respective length to a running total:
+As an example, assume we have a list of bird names and want to count the *total number of characters* used in this list. One way to do this would be to loop through all the names and add the respective length to a running total:
 
 ```py
 """ counting characters using a loop """
@@ -83,7 +83,7 @@ for name in birds:
 
 Notice how this is already an example of a `reduce` operation: we have compressed the list of names into a single number.
 
-In this example, we have counted the number of characters while iterating over the names. A second approach would be to first count the characters of each word, and then, in a second step, sum up all the counts.
+In this example, we have counted the number of characters *while* iterating over the names. An alternative approach would be to first count the characters in each word, and then, in a second step, sum up all the counts.
 
 ```py
 """ Counting characters in two steps """
@@ -109,9 +109,9 @@ In the next section, we will take a look at the whole framework and try to answe
 
 
 ## Counting Birds with MapReduce
-How many different species can we expect to live in a single country? In other words: how many different species live in each country on average? That's a more elaborate question now. Let's see how we can answer the question using *MapReduce*. It may take a bit to get used to this way of solving problems, but that's fine because we're not in hurry.
+How many different species can we expect to live in a single country? In other words: how many different species live in each country on average? That's a more elaborate question now. Let's see how we can answer it using *MapReduce*. This way of solving problems may take a little getting used to, but that's fine because we're not in hurry. Or are we?
 
-First, we probably want to group the birds by country and then in a second step count how many unique species are in each group. To group birds by country, we can go over all observations and for each one output first the country, then the bird. Once we sort this output, we can see how groups start to form.
+First, we probably want to group the birds by country and then in a second step count how many unique species are in each group before computing the average count overa all groups. To group birds by country, we can go over all observations and for each one output first the country, then the bird. Once we sort this output, we can see how groups start to form.
 
 To illustrate this approach, let's start with some **raw observation data**:
 
