@@ -111,7 +111,9 @@ In the next section, we will take a look at the whole framework and try to answe
 
 *Figure 1: Distributed Map Reduce Process. Multiple nodes perform a mapping operation in parallel. Only the results need to travel across the network to be aggregated in the final reduce step.*
 
-The map operation is a transformation of one piece of information into another. It is fully determined by the transformation function and does not need to know anything about the rest of the data. Because of this independence, a data set can be split into multiple pieces and the mapping can be performed on each of them in parallel on multiple machines. If we assume for a moment that counting the length of words was a very time consuming operation, we see how the above job could get a performance increase if many computers were working on it in parallel. After the map step, the intermediate results (the character counts), could be collected to be summed up, as figure 1 illustrates.
+The map operation is a transformation of one piece of information into another. It is fully determined by the transformation function and does not need to know anything about the rest of the data. Because of this independence, a data set can be split into multiple pieces and the mapping can be performed on each of them in parallel on multiple machines. After the map step, the intermediate results (the character counts), could be collected to be summed up, as figure 1 illustrates.
+
+If we assume for a moment that counting the length of words was a very time consuming operation, we see how the above job could get a performance increase if many computers were working on it in parallel. Actually, even just reading a massive data set from dist can take a *lot* of time, and parallel reading speeds up this process linearly with each additional cluster node: two computers, each reading half of the data set in parallel, takes only half the time.
 
 
 ## Counting Birds with MapReduce
