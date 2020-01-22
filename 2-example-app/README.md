@@ -119,7 +119,7 @@ If we assume for a moment that counting the length of words was a very time cons
 ## Counting Birds with MapReduce
 How many different species can we expect to live in a single country? In other words: how many different species live in each country on average? That's a more elaborate question now. Let's see how we can answer it using *MapReduce*. This way of solving problems may take a little getting used to, but that's fine because we're not in hurry. Or are we?
 
-First, we probably want to group the birds by country and then in a second step count how many unique species are in each group before computing the average count overa all groups. To group birds by country, we can go over all observations and for each one output first the country, then the bird. Once we sort this output, we can see how groups start to form.
+First, we probably want to group the birds by country and then in a second step count how many unique species are in each group before computing the average count over all groups. To group birds by country, we can go over all observations and for each one output first the country, then the bird. Once we sort this output, we can see how groups start to form.
 
 To illustrate this approach, let's start with some **raw observation data**:
 
@@ -128,6 +128,7 @@ Stork,LY
 Hawk,IL
 Goose,LY
 Goose,LY
+Duck, IL
 Bald eagle,BD
 ```
 
@@ -138,28 +139,30 @@ LY      Stork
 IL      Hawk
 LY      Goose
 LY      Goose
+IL      Duck
 BD      Bald eagle
 ```
 
-The mapper has turned each record into a single key/value pair. Now let's **sort** this list so that we have consecutive observations for each country:
+This can be seen as a mapping where the mapper has turned each record into a single key/value pair. Now let's **sort** this list. We can see how birds in the same group are listed together:
 
 ```txt
 BD      Bald eagle
+IL      Duck
 IL      Hawk
 LY      Goose
 LY      Goose
 LY      Stork
 ```
 
-At this point, we can **count unique birds** per country:
+At this point, we can **count unique birds** per country conveniently:
 
 ```txt
 BD      1
-IL      1
+IL      2
 LY      2
 ```
 
-The reducer has condensed the input by computing aggregates for each group. Notice that the reducer output is not a single value, but is once more a list of key/value pairs. This need not be the case, but it is definitely possible and not uncommon. In fact, many real world *MapReduce* jobs stack multiple mappers and reducers on top of each other.
+This last step is a reduce operaton that has condensed the input by computing aggregates for each group. Notice that the reducer output is not a single value, but is once more a list of key/value pairs. This need not be the case, but it is definitely possible and not uncommon. In fact, many real world *MapReduce* jobs stack multiple mappers and reducers on top of each other.
 
 We're not done yet. We wanted to compute the average number of different species per country, and so far we only have the species count per country. What's left is to compute the average over these counts. That's clearly a job for a reducer - it's input will be the list of counts, and this time it produces a single number, the average, as output. We can chain this reducer onto the previous one. Alternatively, the previous reducer could already have computed the average itself, but this way we have an opportunity to see chaining in action.
 
