@@ -10,7 +10,7 @@ python >= 3.6
 ```
 
 
-## I've Just Seen a Sparrow in Italy
+## I've Seen a Sparrow in Italy
 Through our little application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume that for some reason the app is really popular and we have collected many such observations from millions of users throughout the world.
 
 To learn more about our natural environment, we collect all the data and store it in a large csv file to run some analyses. With one observation, a `bird species` and a `country code`, per line, on without collecting any futher information for now, our data will look something like this:
@@ -177,6 +177,8 @@ As noted in the opening paragraph, all code is written in Python. And what's mor
 Let's take a look at the mapper. All it has to do is output the country as key and the bird as value:
 
 ```py
+#!/usr/bin/env python
+
 """ mapper.py
 
 Create country/bird pairs:
@@ -199,6 +201,8 @@ The mapper script does not seem to do much, but don't be fooled. It not only out
 Next up is our first reducer, which counts distinct species in a country. It works by collecting all birds for one country in a set, which makes sure they are distinct. Once a new country appears, it outputs how many different birds were observed in the previous one, and creates a new set.
 
 ```py
+#!/usr/bin/env python
+
 """ reducer-count.py
 
 Determine number of distinct birds per country
@@ -244,7 +248,9 @@ When the reducer can assume input is sorted by key, i.e. by country, it can hand
 With this, we turn to our second and last reducer, which computes the average over all country counts:
 
 ```python
-""" mapper.py
+#!/usr/bin/env python
+
+""" reducer-mean.py
 
 Compute average count over all counties
 country<TAB>count -> average_count
