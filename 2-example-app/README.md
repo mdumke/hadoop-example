@@ -9,6 +9,8 @@ In the following, we'll approach the pattern by observing how it operates on dat
 python >= 3.6
 ```
 
+While all code is is listed here and results for many of the operations are discussed in detail, please feel invited to follow along on your own computer to get a deeper understanding.
+
 
 ## I've Seen a Sparrow in Italy
 Through our little application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume that for some reason the app is really popular and we have collected many such observations from millions of users throughout the world.
@@ -107,7 +109,7 @@ The formalization using key/value pairs as well as the application of reducers t
 
 In the next section, we will take a look at the whole framework and try to answer our open question from before that was too complicated for a simple Unix pipeline. Before that, however, let us briefly reflect on how this pattern might lend itself to parallel execution.
 
-![Map Reduce illustration](map-reduce.png "Figure 1: Distributed Map Reduce")  
+![Map Reduce illustration](.assets/map-reduce.png)  
 
 *Figure 1: Distributed Map Reduce Process. Multiple nodes perform a mapping operation in parallel. Only the results need to travel across the network to be aggregated in the final reduce step.*
 
@@ -192,7 +194,7 @@ for line in sys.stdin.readlines():
     # observations are comma separated, so we split each line
     bird, country = line.rstrip('\n').split(',', 1)
 
-    # output key/value pairs using <TAB> for demarkation
+    # output key/value pairs using <TAB> for demarcation
     print(f'{country}\t{bird}')
 ```
 
