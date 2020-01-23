@@ -9,13 +9,13 @@ In the following, we'll approach the pattern by observing how it operates on dat
 python >= 3.6
 ```
 
-While all code is is listed here and results for many of the operations are discussed in detail, please feel invited to follow along on your own computer to get a deeper understanding.
+While all analytics code will be listed and discussed in some detail, please feel invited to follow along on your own computer.
 
 
 ## I've Seen a Sparrow in Italy
-Through our little application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume that for some reason the app is really popular and we have collected many such observations from millions of users throughout the world.
+Through our imaginary example application users can notify us when they have encountered a bird. In particular, they can tell us which species they've encountered and where. Let's assume that for some reason the app is really popular and we have collected many such observations from millions of users throughout the world.
 
-To learn more about our natural environment, we collect all the data and store it in a large csv file to run some analyses. With one observation, a `bird species` and a `country code`, per line, on without collecting any futher information for now, our data will look something like this:
+To learn more about our natural environment, we collect all the data and store it in a large CSV file to run some analyses. Why not a proper database? Because we're going to be working with Hadoop later on, and that will provide us with a filesystem for large files such as a big CSV. Anyways, with one observation, a `bird species` and a `country code`, per line, and without collecting any futher information for now, our data will look something like this:
 
 ```txt
 Stork,LY
@@ -62,13 +62,15 @@ cat data/birds*.csv \
   | head -n 5
 ```
 
-Using the command line, we can create powerful streaming pipelines that can help us answer simple questions. However, more elaborate questions may require a lot of effort to answer in this manner. Take, for instance, the question: how many different species are observed in each country on average? We'd need to group birds by country, then create a sum of unique birds in each group and finally average over all these sums. And what if our data is stored on multiple computers? Would we transfer it across the network to put it through our pipeline? This would become even more problematic if we wanted to handle massive amounts of data that could not possibly fit onto a single computer. That's where *MapReduce* enters the stage.
+Using the command line, we can create powerful streaming pipelines that can help us answer some basic analytics questions. However, more elaborate questions may require a lot of effort to answer in this manner. Take, for instance, the question: how many different species are observed in each country on average? We'd need to group birds by country, then create a sum of unique birds in each group and finally average over all these sums.
+
+Unix-like pipelines also become harder to buid once our data is stored on multiple computers. We'd have to transfer everything across the network to put it through our pipeline. This would become even more problematic if we wanted to handle massive amounts of data that could not possibly fit onto a single computer. That's where *MapReduce* enters the stage.
 
 
 ## Programming with Mappers and Reducers
-Two common concepts from *functional programming* are `map` and `reduce`, and they are often used together. Both operate on collections of data. A *mapping* replaces each item in the collection with another one, namely with the result of passing the item through some function. A *reduction* compresses or combines all values into an aggregate value.
+Two common concepts from *functional programming* are `map` and `reduce`, and they are often used together. Both operate on collections of data. A *mapping* replaces each item in a collection with another one, namely with the result of passing the item through a transformation function. A *reduction* compresses or combines all values in a collection into an aggregate value.
 
-As an example, assume we have a list of bird names and want to count the *total number of characters* used in this list. One way to do this would be to loop through all the names and add the respective length to a running total:
+As an example, assume we have a list of bird names and want to count the *total number of characters* used in this list. We'd go over all the names, count the characters, and sum them up. One way to implement this would be to loop through all the names and add the respective length to a running total:
 
 ```py
 """ counting characters using a loop """
@@ -78,14 +80,14 @@ birds = ['Stork', 'Dove', 'Sparrow', 'Flamingo']
 # initialize a running total
 total = 0
 
-# add the number of character in each name
+# add the number of characters in each name
 for name in birds:
     total = len(name)
 ```
 
 Notice how this is already an example of a `reduce` operation: we have compressed the list of names into a single number.
 
-In this example, we have counted the number of characters *while* iterating over the names. An alternative approach would be to first count the characters in each word, and then, in a second step, sum up all the counts.
+In this example, we have counted the number of characters *while* iterating over the names. An alternative approach would be to *first* count the characters in each word, and *then*, in a second step, sum up all the counts:
 
 ```py
 """ Counting characters in two steps """
@@ -99,7 +101,21 @@ word_lengths = [len(name) for name in names]
 total = sum(word_lengths)
 ```
 
-We can see how a *map* and *reduce* step work together to achieve the desired result. This seemingly simple pattern can be very powerful. As Jeffrey Dean and Sanjay Ghemawat write in their [seminal paper](https://research.google/pubs/pub62/) accompanying their implementation of *MapReduce* at Google:
+We can see how a *map* and *reduce* step work together to achieve the desired result. We can rewrite the code in a more functional style, with proper transformation functions, to make the pattern even more explicit:
+
+```py
+""" Counting characters with map and reduce """
+
+from functools import reduce
+from operator import add
+
+birds = ['Stork', 'Dove', 'Sparrow', 'Flamingo']
+
+# apply transformation functions len and add
+total = reduce(add, map(len, birds))
+```
+
+This seemingly simple pattern can be very powerful. As Jeffrey Dean and Sanjay Ghemawat write in their [seminal paper](https://research.google/pubs/pub62/) accompanying their implementation of *MapReduce* at Google:
 
 > We realized that most of our computations involved applying a *map* operation to every logical "record" in our input in order to compute a set of intermediate key/value pairs, and then applying a *reduce* operation to all the values that shared the same key, in order to combine the derived data appropriately.
 
@@ -145,7 +161,7 @@ IL      Duck
 BD      Bald eagle
 ```
 
-This can be seen as a mapping where the mapper has turned each record into a single key/value pair. Now let's **sort** this list. We can see how birds in the same group are listed together:
+This can be seen as a mapping where the mapper has turned each record into a single key/value pair. Now let's **sort** this list by keys. We can see how birds in the same country are grouped together naturally:
 
 ```txt
 BD      Bald eagle
@@ -282,6 +298,6 @@ We are piping our example data through the mapper, then sort and reduce, then ch
 
 We've covered a lot of ground. From reviewing Unix pipelines for analytics processing, we went on to discussing the basics of *MapReduce* and have seen that there is a `sort` step in between that must not be overlooked. Finally, we have gone through an implementation of a *MapReduce* job in Python, all on test data from our bird tracking application.
 
-These are only the basics of the *MapReduce* framework. What do we do if data is unbalanced and overloads a single reducer? Should it be persisted between different stages in a chained job? And how can we practically perform more complex operations such as SQL-like joins on massive, distributed datasets?
+These are only the basics of the *MapReduce* framework. What do we do if data is unbalanced and overloads a single reducer? What if we cannot use <TAB> for demarcating keys and values? And how can we practically perform more complex operations such as SQL-like joins on massive, distributed datasets?
 
-These are all valid, yet more advanced questions. For now, we have achieved what we set out to do: get a basic understanding of *MapReduce* and create some test data for an example application. We can not turn back to Hadoop and see how we can run our analytics jobs there.
+These are all valid, yet more advanced questions. For now, we have hopefully achieved what we set out to do: get a basic understanding of *MapReduce* and create some test data for an example application. We can now turn back to Hadoop and see how we can run our new analytics jobs there.
