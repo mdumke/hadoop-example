@@ -17,11 +17,11 @@ If you've made it through this section, you now have a running, albeit basic, Ha
 
 
 ## An Example Application
-Hadoop allows us to operate on data that is distributed across potentially thousands of computers, and it abstracts the challenges of resource management and parallel execution of code. For this to work, however, we need our code to respect the basic *MapReduce* execution pattern, so let's take a look at that.
+Hadoop allows us to operate on data that is distributed across potentially thousands of computers, and it abstracts away the challenges of resource management and parallel execution of code. For this to work, however, we need our code to respect the basic *MapReduce* execution pattern, so let's take a look at that.
 
-As a side note, please be aware that there are new tools in the Hadoop environment such as [Apache Spark](http://spark.apache.org/), [Apache HBase](http://hbase.apache.org/) and many others that allow for diffent forms of interaction with Hadoop based Big Data systems. These developments make it is unlikely that you'll ever be writing *MapReduce* jobs to run in production. Still, understanding the basic *MapReduce* execution pattern will enhance our ability to work with these other tools as well. And it's fun.
+As a side note, know that there are new tools in the Hadoop environment such as [Apache Spark](http://spark.apache.org/), [Apache HBase](http://hbase.apache.org/) and many others that allow for diffent forms of interaction with Hadoop based Big Data systems. These developments make it unlikely that you'll ever be writing *MapReduce* jobs to run in production. Still, understanding the basic *MapReduce* execution pattern will enhance the ability to work with these other tools as well. And it's fun.
 
-In order to understand how *MapReduce* works, we don't actually need Hadoop. The pattern is more general. So before running any jobs on the machine we have prepared before, let's go through a basic example to see *MapReduce* in action. By doing this, we'll also start building a tiny application, including fake data and analytics scripts, that we can reuse later on:
+In order to understand how *MapReduce* works, we don't actually need Hadoop. The pattern is more general. So before running any jobs on the machine we have prepared before, let's go through a basic example that can run on a standard Unix system. In doing this, we'll also start building a tiny application, including fake data and analytics scripts, that we can reuse later on:
 
 [Bird Tracking Example Application](./2-example-app)
 
