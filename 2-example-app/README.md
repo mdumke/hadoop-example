@@ -282,10 +282,10 @@ counts = [int(line.split('\t')[1]) for line in sys.stdin.readlines()]
 print(sum(counts) / len(counts))
 ```
 
-This reducer producer a single number, our final output. With this in place, we are ready to try out the whole pipeline on our example data. Make sure all scripts are executable (consider a `sudo chmod 755 *.py` in the working directory if you're unsure). If permissions on the scripts allow for execution, we can build the pipeline to answer the original question:
+This reducer producer a single number, our final output. With this in place, we are ready to try out the whole pipeline on our example data. Make sure all scripts are executable (consider a `sudo chmod 755 scripts/*.py` in the working directory if you're unsure). If permissions on the scripts allow for execution, we can build the pipeline to answer the original question:
 
 ```sh
-# biodiversity: average species per country
+# expected bird diversity in one country
 cat data/birds*.csv \
   | scripts/mapper.py \
   | sort \
@@ -300,6 +300,6 @@ We are piping our example data through the mapper, then sort and reduce, then ch
 
 We've covered a lot of ground. From reviewing Unix pipelines for analytics processing, we went on to discussing the basics of *MapReduce* and have seen that there is a `sort` step in between that must not be overlooked. Finally, we have gone through an implementation of a *MapReduce* job in Python, all on test data from our bird tracking application.
 
-These are only the basics of the *MapReduce* framework. What do we do if data is unbalanced and overloads a single reducer? What if we cannot use <TAB> for demarcating keys and values? And how can we practically perform more complex operations such as SQL-like joins on massive, distributed datasets?
+These are only the basics of the *MapReduce* framework. What do we do if data is unbalanced and overloads a single reducer? What if we cannot use `TAB` for demarcating keys and values? And how can we practically perform more complex operations such as SQL-like joins on massive, distributed datasets?
 
 These are all valid, yet more advanced questions. For now, we have hopefully achieved what we set out to do: get a basic understanding of *MapReduce* and create some test data for an example application. We can now turn back to Hadoop and see how we can run our new analytics jobs there.
