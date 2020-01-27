@@ -82,7 +82,7 @@ total = 0
 
 # add the number of characters in each name
 for name in birds:
-    total = len(name)
+    total += len(name)
 ```
 
 Notice how this is already an example of a `reduce` operation: we have compressed the list of names into a single number.
